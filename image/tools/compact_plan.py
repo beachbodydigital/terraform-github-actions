@@ -32,4 +32,10 @@ def compact_plan(input):
 
 if __name__ == '__main__':
     for line in compact_plan(sys.stdin.readlines()):
-        sys.stdout.write(line)
+        if (
+            line.startswith('Terraform used the selected providers to generate the following execution') and
+            sys.argv[1]
+        ):
+            sys.stdout.write(f"\n{line}\nPlan output for {sys.argv[1].upper()} workspace!\n")
+        else:
+            sys.stdout.write(line)

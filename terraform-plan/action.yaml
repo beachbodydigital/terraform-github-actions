@@ -49,6 +49,10 @@ inputs:
     description: Add the plan to a GitHub PR
     required: false
     default: "true"
+  ignore_default_workspace:
+    description: Remove default workspace while listing all workspaces existing
+    required: false
+    default: false
 
 outputs:
   changes:

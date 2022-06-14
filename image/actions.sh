@@ -223,6 +223,10 @@ function init-backend-default-workspace() {
 }
 
 function select-workspace() {
+    if [[ "$INPUT_WORKSPACE" == "null" ]]; then
+        return 0
+    fi
+
     local WORKSPACE_EXIT
 
     debug_log terraform workspace select "$INPUT_WORKSPACE"
@@ -353,30 +357,51 @@ function write_credentials() {
     debug_cmd git config --list
 }
 
-function plan() {
-
-    local PLAN_OUT_ARG
-    if [[ -n "$PLAN_OUT" ]]; then
-        PLAN_OUT_ARG="-out=$PLAN_OUT"
-    else
-        PLAN_OUT_ARG=""
-    fi
-
-    # shellcheck disable=SC2086
-    debug_log terraform plan -input=false -no-color -detailed-exitcode -lock-timeout=300s $PARALLEL_ARG $PLAN_OUT_ARG '$PLAN_ARGS'  # don't expand PLAN_ARGS
-
+function list_workspaces() {
     set +e
-    # shellcheck disable=SC2086
-    (cd "$INPUT_PATH" && terraform plan -input=false -no-color -detailed-exitcode -lock-timeout=300s $PARALLEL_ARG $PLAN_OUT_ARG $PLAN_ARGS) \
-        2>"$STEP_TMP_DIR/terraform_plan.stderr" \
-        | $TFMASK \
-        | tee /dev/fd/3 "$STEP_TMP_DIR/terraform_plan.stdout" \
-        | compact_plan \
-            >"$STEP_TMP_DIR/plan.txt"
+    (cd "$INPUT_PATH" && terraform workspace list -no-color) \
+        2>"$STEP_TMP_DIR/terraform_workspace_list.stderr" \
+        >"$STEP_TMP_DIR/terraform_workspace_list.stdout"
 
-    # shellcheck disable=SC2034
-    PLAN_EXIT=${PIPESTATUS[0]}
     set -e
+    echo "List of all workspaces available"
+    WORKSPACES_LIST=$(cat "$STEP_TMP_DIR/terraform_workspace_list.stdout")
+    echo "Workspaces available: $WORKSPACES_LIST"
+    if [[ "$INPUT_IGNORE_DEFAULT_WORKSPACE" == "true" ]]; then
+        WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/default//g;s/null//g')
+    else
+        WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/null//g')
+    fi
+}
+
+function plan() {
+    list_workspaces
+    for workspace in $WORKSPACES; do
+        terraform workspace select "$workspace"
+
+        local PLAN_OUT_ARG
+        if [[ -n "$PLAN_OUT" ]]; then
+            PLAN_OUT_ARG="-out=$PLAN_OUT"
+        else
+            PLAN_OUT_ARG=""
+        fi
+
+        # shellcheck disable=SC2086
+        debug_log terraform plan -input=false -no-color -detailed-exitcode -lock-timeout=300s $PARALLEL_ARG $PLAN_OUT_ARG '$PLAN_ARGS'  # don't expand PLAN_ARGS
+
+        set +e
+        # shellcheck disable=SC2086
+        (cd "$INPUT_PATH" && terraform plan -input=false -no-color -detailed-exitcode -lock-timeout=300s $PARALLEL_ARG $PLAN_OUT_ARG $PLAN_ARGS) \
+            2>"$STEP_TMP_DIR/terraform_plan.stderr" \
+            | $TFMASK \
+            | tee /dev/fd/3 "$STEP_TMP_DIR/terraform_plan.stdout" \
+            | compact_plan "$workspace" \
+                >>"$STEP_TMP_DIR/plan.txt"
+
+        # shellcheck disable=SC2034
+        set -e
+    done
+    PLAN_EXIT=${PIPESTATUS[0]}
 }
 
 function destroy() {
