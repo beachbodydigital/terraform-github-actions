@@ -5,6 +5,7 @@ source /usr/local/actions.sh
 
 debug
 setup
+init-backend-workspace
 set-plan-args
 
 exec 3>&1
