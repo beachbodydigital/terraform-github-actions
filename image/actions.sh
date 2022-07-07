@@ -377,11 +377,8 @@ function list_workspaces() {
 function plan() {
     list_workspaces
     for workspace in $WORKSPACES; do
-        set -x
         (cd "$INPUT_PATH" && terraform init)
-
         (cd "$INPUT_PATH" && terraform workspace select "$workspace")
-        echo "passed workspace selection"
 
         local PLAN_OUT_ARG
         if [[ -n "$PLAN_OUT" ]]; then
@@ -389,7 +386,6 @@ function plan() {
         else
             PLAN_OUT_ARG=""
         fi
-        echo "passed PLAN_OUT_ARG if"
 
         # shellcheck disable=SC2086
         debug_log terraform plan -input=false -no-color -detailed-exitcode -lock-timeout=300s $PARALLEL_ARG $PLAN_OUT_ARG '$PLAN_ARGS'  # don't expand PLAN_ARGS
