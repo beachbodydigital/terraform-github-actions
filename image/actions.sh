@@ -378,7 +378,7 @@ function plan() {
     list_workspaces
     for workspace in $WORKSPACES; do
         set -x
-        terraform init
+        (cd "$INPUT_PATH" && terraform init)
 
         terraform workspace select "$workspace"
 
