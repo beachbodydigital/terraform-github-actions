@@ -378,6 +378,8 @@ function plan() {
     list_workspaces
     for workspace in $WORKSPACES; do
         set -x
+        init-backend-workspace
+
         terraform workspace select "$workspace"
 
         local PLAN_OUT_ARG
@@ -386,8 +388,6 @@ function plan() {
         else
             PLAN_OUT_ARG=""
         fi
-
-        init-backend-workspace
 
         # shellcheck disable=SC2086
         debug_log terraform plan -input=false -no-color -detailed-exitcode -lock-timeout=300s $PARALLEL_ARG $PLAN_OUT_ARG '$PLAN_ARGS'  # don't expand PLAN_ARGS
