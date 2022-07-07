@@ -377,7 +377,6 @@ function list_workspaces() {
 function plan() {
     list_workspaces
     for workspace in $WORKSPACES; do
-        # (cd "$INPUT_PATH" && terraform init)
         (cd "$INPUT_PATH" && terraform workspace select "$workspace")
 
         local PLAN_OUT_ARG
