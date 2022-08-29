@@ -157,11 +157,11 @@ function init-backend-workspace() {
 
     rm -rf "$TF_DATA_DIR"
 
-    debug_log TF_WORKSPACE=$INPUT_WORKSPACE terraform init -input=false '$INIT_ARGS'  # don't expand INIT_ARGS
+    debug_log terraform init -input=false '$INIT_ARGS'  # don't expand INIT_ARGS
 
     set +e
     # shellcheck disable=SC2086
-    (cd "$INPUT_PATH" && TF_WORKSPACE=$INPUT_WORKSPACE terraform init -input=false $INIT_ARGS \
+    (cd "$INPUT_PATH" && terraform init -input=false $INIT_ARGS \
         2>"$STEP_TMP_DIR/terraform_init.stderr")
 
     local INIT_EXIT=$?
@@ -377,7 +377,6 @@ function list_workspaces() {
 function plan() {
     list_workspaces
     for workspace in $WORKSPACES; do
-        (cd "$INPUT_PATH" && init-backend-workspace)
         (cd "$INPUT_PATH" && terraform workspace select "$workspace")
         (cd "$INPUT_PATH" && terraform refresh)
 
