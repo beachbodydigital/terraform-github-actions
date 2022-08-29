@@ -378,6 +378,7 @@ function plan() {
     list_workspaces
     for workspace in $WORKSPACES; do
         (cd "$INPUT_PATH" && terraform workspace select "$workspace")
+        (cd "$INPUT_PATH" && terraform refresh)
 
         local PLAN_OUT_ARG
         if [[ -n "$PLAN_OUT" ]]; then
