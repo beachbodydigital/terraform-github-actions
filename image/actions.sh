@@ -377,6 +377,8 @@ function list_workspaces() {
 function plan() {
     list_workspaces
     for workspace in $WORKSPACES; do
+        (cd "$INPUT_PATH" && rm -f .terraform)
+        init-backend-workspace
         (cd "$INPUT_PATH" && terraform workspace select "$workspace")
         (cd "$INPUT_PATH" && terraform refresh)
 
