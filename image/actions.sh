@@ -370,7 +370,7 @@ function list_workspaces() {
     if [[ "$INPUT_IGNORE_DEFAULT_WORKSPACE" == "true" ]]; then
         WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/default//g;s/null//g')
     else
-        WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/null//g')
+        WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/null//g;s/prod//g')
     fi
 }
 
