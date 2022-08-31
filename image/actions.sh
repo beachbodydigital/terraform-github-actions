@@ -368,7 +368,7 @@ function list_workspaces() {
     WORKSPACES_LIST=$(cat "$STEP_TMP_DIR/terraform_workspace_list.stdout")
     echo "Workspaces available: $WORKSPACES_LIST"
     if [[ "$INPUT_IGNORE_DEFAULT_WORKSPACE" == "true" ]]; then
-        WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/default//g;s/null//g;s/prod//g')
+        WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/default//g;s/null//g')
     else
         WORKSPACES=$(echo "$WORKSPACES_LIST" | sed 's/\* //g;s/null//g')
     fi
@@ -380,7 +380,6 @@ function plan() {
         (cd "$INPUT_PATH" && rm -f .terraform)
         init-backend-workspace
         (cd "$INPUT_PATH" && terraform workspace select "$workspace")
-        (cd "$INPUT_PATH" && terraform refresh)
 
         local PLAN_OUT_ARG
         if [[ -n "$PLAN_OUT" ]]; then
